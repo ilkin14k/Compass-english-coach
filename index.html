@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compass — B1 to B2 Erasmus English Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --ink:#1B2A41;
+  --ink-soft:#3C4E68;
+  --gold:#C9A227;
+  --gold-soft:#E4C765;
+  --teal:#2E6F6B;
+  --teal-soft:#4E938F;
+  --paper:#F7F4EC;
+  --paper-2:#EFE9D8;
+  --card:#FFFFFF;
+  --line:#DCD3B8;
+  --red:#B14A3B;
+  --shadow: 0 10px 30px -12px rgba(27,42,65,0.25);
+  --radius: 14px;
+  --font-display:'Fraunces', serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+[data-theme="dark"]{
+  --ink:#F2ECD9;
+  --ink-soft:#C7BFA6;
+  --paper:#12181F;
+  --paper-2:#1A222B;
+  --card:#1D2530;
+  --line:#2C3646;
+  --gold:#E4C765;
+  --teal:#5FB3AC;
+  --shadow: 0 10px 30px -12px rgba(0,0,0,0.6);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  transition: background .3s ease, color .3s ease;
+  min-height:100vh;
+}
+::selection{ background: var(--gold-soft); color:var(--ink);}
+a{color:inherit;}
+button{font-family:inherit; cursor:pointer;}
+.app{ display:flex; min-height:100vh; }
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  width:250px; flex-shrink:0;
+  background: var(--ink);
+  color: var(--paper);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  z-index:20;
+}
+[data-theme="dark"] .sidebar{ background:#0B0F14; }
+.sidebar-brand{
+  padding:26px 22px 18px;
+  border-bottom:1px solid rgba(247,244,236,0.12);
+}
+.sidebar-brand .mark{
+  font-family:var(--font-display); font-weight:700; font-size:1.5rem;
+  letter-spacing:.5px;
+}
+.sidebar-brand .mark span{ color:var(--gold); }
+.sidebar-brand .sub{ font-size:.72rem; opacity:.6; margin-top:4px; letter-spacing:.08em; text-transform:uppercase;}
+.nav-group{ padding:14px 12px; }
+.nav-label{ font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; opacity:.45; padding:10px 10px 6px;}
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  width:100%; background:none; border:none; color:var(--paper);
+  padding:10px 12px; border-radius:10px; font-size:.88rem; text-align:left;
+  opacity:.75; transition: all .15s ease;
+}
+.nav-item:hover{ background:rgba(247,244,236,0.08); opacity:1;}
+.nav-item.active{ background:var(--gold); color:var(--ink); opacity:1; font-weight:600;}
+.nav-icon{ width:18px; text-align:center; font-size:.95rem;}
+.sidebar-foot{ margin-top:auto; padding:16px 20px; border-top:1px solid rgba(247,244,236,0.12); font-size:.72rem; opacity:.55;}
+
+/* ---------- MAIN ---------- */
+.main{ flex:1; min-width:0; }
+.topbar{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 32px; background:var(--paper); border-bottom:1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+.topbar h1{ font-family:var(--font-display); font-size:1.3rem; font-weight:600;}
+.topbar .az{ font-size:.78rem; color:var(--ink-soft); margin-top:2px;}
+.topbar-actions{ display:flex; gap:10px; align-items:center;}
+.icon-btn{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line);
+  background:var(--card); display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+}
+.content{ padding:28px 32px 80px; max-width:1180px; }
+
+/* ---------- CARD PRIMITIVES ---------- */
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:22px; box-shadow: var(--shadow);
+}
+.grid{ display:grid; gap:18px; }
+.grid-2{ grid-template-columns:1fr 1fr; }
+.grid-3{ grid-template-columns:repeat(3,1fr); }
+.grid-4{ grid-template-columns:repeat(4,1fr); }
+@media(max-width:900px){ .grid-2,.grid-3,.grid-4{ grid-template-columns:1fr; } .sidebar{position:fixed; left:-260px; transition:left .2s;} .sidebar.open{left:0;} .content{padding:20px 16px;} .topbar{padding:14px 16px;} }
+
+h2.section-title{ font-family:var(--font-display); font-size:1.5rem; font-weight:600; margin-bottom:4px;}
+.section-sub{ color:var(--ink-soft); font-size:.9rem; margin-bottom:18px; }
+.tag{
+  display:inline-flex; align-items:center; gap:5px; font-size:.68rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em; padding:3px 9px; border-radius:20px;
+  background:var(--paper-2); color:var(--teal); border:1px solid var(--line);
+}
+.tag.gold{ color:var(--gold); }
+.tag.red{ color:var(--red); }
+
+/* ---------- PASSPORT (signature element) ---------- */
+.passport-wrap{ display:flex; gap:22px; align-items:stretch; flex-wrap:wrap;}
+.passport{
+  width:260px; min-height:190px; border-radius:10px; position:relative; flex-shrink:0;
+  background: linear-gradient(155deg, var(--ink) 0%, #223554 100%);
+  color:var(--paper); padding:20px; box-shadow: var(--shadow);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.passport::before{
+  content:''; position:absolute; inset:8px; border:1px dashed rgba(228,199,101,0.35); border-radius:6px; pointer-events:none;
+}
+.passport .p-title{ font-family:var(--font-display); font-size:1rem; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-soft);}
+.passport .p-level{ font-size:2rem; font-family:var(--font-display); font-weight:700; margin-top:14px;}
+.passport .p-target{ font-size:.78rem; opacity:.7; margin-top:2px;}
+.stamps{ flex:1; min-width:260px; }
+.stamps-grid{ display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:10px;}
+.stamp{
+  aspect-ratio:1; border-radius:50%; border:2px dashed var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700;
+  color:var(--ink-soft);
+}
+.stamp.done{ border-style:solid; border-color:var(--teal); color:var(--teal); background:rgba(46,111,107,0.08); transform:rotate(-6deg);}
+.stamp.current{ border-color:var(--gold); color:var(--gold); box-shadow:0 0 0 3px rgba(201,162,39,0.15);}
+
+/* progress bar */
+.pbar-track{ height:10px; border-radius:6px; background:var(--paper-2); overflow:hidden; border:1px solid var(--line);}
+.pbar-fill{ height:100%; background:linear-gradient(90deg, var(--teal), var(--gold)); border-radius:6px; transition:width .5s ease;}
+
+.stat{ text-align:left; }
+.stat .num{ font-family:var(--font-display); font-size:1.8rem; font-weight:700;}
+.stat .lbl{ font-size:.76rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:2px;}
+
+/* buttons */
+.btn{
+  display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:9px; border:none;
+  font-weight:600; font-size:.86rem; background:var(--ink); color:var(--paper); transition:transform .12s;
+}
+.btn:hover{ transform:translateY(-1px);}
+.btn.gold{ background:var(--gold); color:var(--ink);}
+.btn.teal{ background:var(--teal); color:#fff;}
+.btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--line);}
+.btn.sm{ padding:6px 12px; font-size:.78rem;}
+.btn:disabled{ opacity:.5; cursor:not-allowed;}
+
+/* week roadmap */
+.week-strip{ display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; margin-bottom:20px;}
+.week-chip{
+  flex-shrink:0; padding:10px 16px; border-radius:10px; border:1px solid var(--line); background:var(--card);
+  font-size:.82rem; font-weight:600; white-space:nowrap;
+}
+.week-chip.active{ background:var(--ink); color:var(--paper); border-color:var(--ink);}
+.week-chip .wk-theme{ display:block; font-weight:400; opacity:.65; font-size:.72rem; margin-top:2px;}
+
+.goal-list{ list-style:none; }
+.goal-list li{ padding:7px 0 7px 20px; position:relative; font-size:.88rem; border-bottom:1px dashed var(--line);}
+.goal-list li:last-child{border-bottom:none;}
+.goal-list li::before{ content:'—'; position:absolute; left:0; color:var(--teal); }
+
+/* day tabs */
+.day-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;}
+.day-tab{ padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); font-size:.82rem; font-weight:600;}
+.day-tab.active{ background:var(--teal); color:#fff; border-color:var(--teal);}
+.day-tab.locked{ opacity:.45;}
+.day-tab .dot{ display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--gold); margin-left:5px;}
+
+.az-box{
+  background:var(--paper-2); border-left:3px solid var(--teal); padding:10px 14px; border-radius:6px;
+  font-size:.86rem; margin:10px 0; color:var(--ink-soft);
+}
+.az-box b{ color:var(--teal); }
+
+.section-block{ margin-bottom:26px; }
+.section-block h3{ font-family:var(--font-display); font-size:1.1rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+.vocab-card{ border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--paper-2); margin-bottom:10px;}
+.vocab-word{ font-family:var(--font-display); font-weight:700; font-size:1.05rem;}
+.vocab-word .pron{ font-family:var(--font-mono); font-weight:400; font-size:.8rem; color:var(--teal); margin-left:8px;}
+.vocab-meta{ font-size:.78rem; color:var(--ink-soft); margin:4px 0;}
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+.chip{ font-size:.74rem; padding:3px 9px; border-radius:20px; background:var(--card); border:1px solid var(--line);}
+
+.qbox{ border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--card);}
+.qbox textarea, .qbox input[type=text]{
+  width:100%; margin-top:8px; padding:9px 10px; border-radius:7px; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink); font-family:inherit; font-size:.88rem;
+}
+.reveal-btn{ font-size:.76rem; color:var(--teal); text-decoration:underline; background:none; border:none; margin-top:6px;}
+.model-answer{ display:none; margin-top:8px; padding:10px; background:var(--paper-2); border-radius:7px; font-size:.85rem;}
+.model-answer.shown{ display:block;}
+
+.checkbox-row{ display:flex; align-items:center; gap:8px; margin-top:10px;}
+.checkbox-row input{ width:18px; height:18px; accent-color: var(--teal);}
+
+/* AI coach chat */
+.chat-window{ height:420px; overflow-y:auto; border:1px solid var(--line); border-radius:10px; padding:16px; background:var(--paper-2); display:flex; flex-direction:column; gap:12px;}
+.msg{ max-width:80%; padding:10px 14px; border-radius:12px; font-size:.88rem; line-height:1.45;}
+.msg.user{ align-self:flex-end; background:var(--teal); color:#fff; border-bottom-right-radius:3px;}
+.msg.ai{ align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:3px;}
+.chat-input-row{ display:flex; gap:8px; margin-top:12px;}
+.chat-input-row input{ flex:1; padding:11px 14px; border-radius:9px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-family:inherit;}
+
+/* sentence builder */
+.sb-slots{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; min-height:46px; align-items:center; padding:12px; background:var(--paper-2); border-radius:10px; border:1px dashed var(--line);}
+.sb-slot{ padding:8px 14px; border-radius:8px; font-size:.86rem; font-weight:600; color:#fff; }
+.sb-pool{ margin-bottom:14px;}
+.sb-pool-label{ font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:6px;}
+.sb-chip{ padding:7px 13px; border-radius:20px; border:1px solid var(--line); background:var(--card); font-size:.84rem; margin:3px;}
+.sb-chip:hover{ background:var(--gold-soft);}
+
+.loader{ display:inline-block; width:14px; height:14px; border:2px solid var(--line); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.empty{ text-align:center; padding:40px 20px; color:var(--ink-soft);}
+.empty .big{ font-size:2rem; margin-bottom:8px;}
+
+table.simple{ width:100%; border-collapse:collapse; font-size:.85rem;}
+table.simple th, table.simple td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line);}
+table.simple th{ color:var(--ink-soft); font-weight:600; font-size:.74rem; text-transform:uppercase; letter-spacing:.05em;}
+
+.hamburger{ display:none; }
+@media(max-width:900px){ .hamburger{ display:flex; } }
+
+.movie-card, .yt-card{ display:flex; gap:14px; align-items:flex-start; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--paper-2);}
+.movie-card .poster, .yt-card .poster{ width:54px; height:54px; border-radius:10px; background:var(--ink); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;}
+
+.score-ring{ width:80px; height:80px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* ============================================================
+   DATA LAYER
+   ============================================================ */
+
+const WEEKS = [
+ {n:1, theme:"Foundations & First Words", az:"Əsaslar və ilk sözlər",
+   goals:["Build daily study habit (30–40 min/day)","Master 40 essential B1–B2 words","Introduce yourself confidently in English"],
+   vocab:["Personal identity, daily routine, hobbies"],
+   speaking:["Self-introduction (1-minute)","Small talk basics: greetings & farewells"],
+   listening:["Slow-speed conversations","Basic accent exposure (British/American)"],
+   grammar:["Present Simple vs Present Continuous"],
+   reading:["Short texts about travel & culture"],
+   writing:["Daily journal entries (3–5 sentences)"],
+   challenge:"Record yourself introducing yourself for 60 seconds and listen back twice.",
+   review:"Can you introduce yourself, talk about your routine, and use present tenses correctly?"},
+ {n:2, theme:"Everyday Conversations", az:"Gündəlik söhbətlər",
+   goals:["Handle everyday transactional conversations","Learn 40 new words on travel/hospitality","Use Past Simple confidently"],
+   vocab:["Travel, airport, hostel, restaurant vocabulary"],
+   speaking:["Restaurant & airport role-plays","Asking for/giving directions"],
+   listening:["Airport announcements, restaurant dialogues"],
+   grammar:["Past Simple vs Past Continuous"],
+   reading:["Texts about travel experiences"],
+   writing:["Informal email to a friend about a trip"],
+   challenge:"Simulate a full restaurant conversation from entering to paying the bill, in English only.",
+   review:"Can you order food, ask for directions, and narrate a past event?"},
+ {n:3, theme:"Opinions & Discussions", az:"Fikirlər və müzakirələr",
+   goals:["Express and justify opinions","Learn 40 words on culture/technology","Master modal verbs for opinion"],
+   vocab:["Opinion adjectives, technology, communication"],
+   speaking:["Agree/disagree discussions","Describing a picture for 1 minute"],
+   listening:["TED-style short talks","Podcast excerpts"],
+   grammar:["Modal verbs (should, might, must)"],
+   reading:["Opinion articles about technology"],
+   writing:["Opinion paragraph (for/against structure)"],
+   challenge:"Debate a partner (or yourself, both sides) on 'Is social media good for society?' for 3 minutes.",
+   review:"Can you give an opinion with reasons and examples, using modals naturally?"},
+ {n:4, theme:"Stories & the Past", az:"Hekayələr və keçmiş",
+   goals:["Tell stories fluently","Learn 40 words on nature/education","Master Present Perfect"],
+   vocab:["Storytelling connectors, nature, education"],
+   speaking:["Storytelling: a memorable experience","Shadowing practice with native audio"],
+   listening:["Movie/TV scene listening","News clips"],
+   grammar:["Present Perfect vs Past Simple"],
+   reading:["Success stories & biographies"],
+   writing:["Short personal story (150 words)"],
+   challenge:"Tell a 2-minute story about a memorable trip or event without notes.",
+   review:"Can you narrate a past experience with correct tense switching?"},
+ {n:5, theme:"Erasmus & Volunteering English", az:"Erasmus və könüllülük ingiliscəsi",
+   goals:["Master Erasmus/ESC-specific vocabulary","Prepare interview answers","Understand conditionals"],
+   vocab:["Volunteering, NGOs, teamwork, leadership"],
+   speaking:["Mock Erasmus/ESC interview","Discussing motivation & goals"],
+   listening:["Volunteer interview recordings (simulated)"],
+   grammar:["First & Second Conditional"],
+   reading:["Texts about volunteering & NGOs"],
+   writing:["Motivation letter draft"],
+   challenge:"Do a full mock ESC interview: answer 8 questions aloud, recording yourself.",
+   review:"Can you explain your motivation for Erasmus/ESC clearly and persuasively?"},
+ {n:6, theme:"Debate & Critical Thinking", az:"Debat və tənqidi düşüncə",
+   goals:["Handle complex discussions","Learn 40 words on psychology/lifestyle","Master Passive Voice"],
+   vocab:["Psychology, lifestyle, communication"],
+   speaking:["5-minute discussion on a chosen topic","Interview-style Q&A practice"],
+   listening:["Documentaries, interviews"],
+   grammar:["Passive Voice"],
+   reading:["Psychology & lifestyle articles"],
+   writing:["Formal email (requesting information)"],
+   challenge:"Give a 3-minute unscripted talk on 'What does success mean to you?'",
+   review:"Can you structure a longer spoken argument with linking words?"},
+ {n:7, theme:"Fluency & Natural Speech", az:"Sərbəstlik və təbii nitq",
+   goals:["Sound more natural: idioms & phrasal verbs","Master relative clauses","Refine pronunciation"],
+   vocab:["Idioms, phrasal verbs, useful expressions"],
+   speaking:["Two-minute speech on a free topic","Native-speaker shadowing (fast speed)"],
+   listening:["Fast-speed native podcasts"],
+   grammar:["Relative Clauses"],
+   reading:["Communication & lifestyle texts with idioms"],
+   writing:["Email replying to an Erasmus coordinator"],
+   challenge:"Shadow a 2-minute native audio clip until your rhythm matches closely.",
+   review:"Can you use at least 5 idioms/phrasal verbs naturally in conversation?"},
+ {n:8, theme:"B2 Exam Simulation & Confidence", az:"B2 imtahan simulyasiyası və özgüvən",
+   goals:["Simulate full B2 exam conditions","Consolidate all grammar","Speak with confidence for 5 minutes straight"],
+   vocab:["Full review of Weeks 1–7 vocabulary"],
+   speaking:["Five-minute speech","Full mock interview simulation"],
+   listening:["Full-length B2 listening exam section"],
+   grammar:["Full grammar review + mixed exercises"],
+   reading:["B2-level exam reading passage"],
+   writing:["Full B2-style essay (200+ words)"],
+   challenge:"Complete the full Month 2 Mock Exam in exam conditions (timed, no notes).",
+   review:"Final self-assessment: rate yourself B1, B1+, or B2 on each skill."}
+];
+
+// Fully authored sample days (Week 1, Days 1-3) — template quality bar for AI-generated days
+const AUTHORED = {
+"1-1": {
+  title:"Day 1 — Who Am I?", az:"Kim mənəm?",
+  vocab:[
+    {word:"outgoing", pron:"/ˈaʊt.ɡəʊ.ɪŋ/", pos:"adjective", meaning:"friendly and confident with people", example:"My sister is very outgoing — she talks to everyone at parties.", collocations:["outgoing personality","outgoing nature"], synonyms:["sociable","friendly"], antonyms:["shy","reserved"]},
+    {word:"routine", pron:"/ruːˈtiːn/", pos:"noun", meaning:"the usual things you do every day", example:"My morning routine starts at 7 AM with coffee.", collocations:["daily routine","break the routine"], synonyms:["habit","schedule"], antonyms:["chaos"]},
+    {word:"get along with", pron:"/ɡet əˈlɒŋ wɪð/", pos:"phrasal verb", meaning:"to have a good relationship with someone", example:"I get along with my coworkers really well.", collocations:["get along well","get along fine"], synonyms:["bond with"], antonyms:["clash with"]},
+    {word:"hobby", pron:"/ˈhɒb.i/", pos:"noun", meaning:"an activity you do for fun in free time", example:"Photography has been my hobby since I was 15.", collocations:["favourite hobby","pick up a hobby"], synonyms:["pastime"], antonyms:[]},
+    {word:"currently", pron:"/ˈkʌr.ənt.li/", pos:"adverb", meaning:"at this time; now", example:"I'm currently learning English for an Erasmus application.", collocations:["currently working on","currently living"], synonyms:["at the moment","presently"], antonyms:["previously"]}
+  ],
+  quiz:[
+    {q:"'She is very ___ — she never stops talking to new people.'", options:["shy","outgoing","tired"], answer:1},
+    {q:"'I ___ learning English every morning.' (choose the correct phrase for 'now')", options:["currently","yesterday","never"], answer:0},
+    {q:"What is the opposite of 'outgoing'?", options:["sociable","shy","busy"], answer:1}
+  ],
+  speaking:{
+    warmup:"Look in a mirror and say 3 sentences about yourself out loud before starting.",
+    task:"Record a 60-second self-introduction: name, where you're from, what you do, your hobbies, and why you're learning English.",
+    az:"Tapşırıq: Özün haqqında 60 saniyəlik təqdimat qeydə al: adın, haradan olduğun, nə etdiyin, hobbilərin və niyə ingilis dili öyrəndiyin.",
+    usefulPhrases:["Let me tell you a bit about myself...","I'm originally from...","In my free time, I enjoy...","One thing about me is that...","I'd say I'm quite a/an ... person."],
+    connectors:["Firstly,","Also,","On top of that,","Besides,","To sum up,"],
+    modelAnswer:"Let me tell you a bit about myself. My name is Aysel, and I'm originally from Baku, Azerbaijan. I currently work at a café and also run a small online shop. In my free time, I enjoy photography and reading. I'd say I'm quite an outgoing person — I love meeting new people. Right now, I'm learning English because I'm planning to apply for an Erasmus project, and I want to communicate confidently with people from other countries."
+  },
+  listening:{
+    title:"A Short Introduction (Slow British English)",
+    script:"Hi, I'm Tom. I'm from Manchester, in the north of England. I work as a graphic designer, and I really enjoy my job. In my free time, I like cycling and cooking. My daily routine is pretty simple: I wake up at seven, go for a run, then start work at nine. I get along really well with my colleagues — we often have lunch together.",
+    questions:[
+      {q:"Where is Tom from?", type:"short"},
+      {q:"What is Tom's job?", type:"short"},
+      {q:"True or False: Tom wakes up at 9 AM.", type:"tf", answer:"False — he wakes up at 7 AM."}
+    ],
+    gapfill:"Tom is from ____ (1) and works as a ____ (2). He enjoys ____ (3) and cooking.",
+    vocabFocus:["graphic designer","colleagues","daily routine"]
+  },
+  reading:{
+    title:"Why Erasmus Changes Lives", topic:"Education / Culture",
+    text:"Every year, thousands of young Europeans pack their bags and move to a new country for a few months through the Erasmus programme. For many, it's their first time living independently, cooking for themselves, or speaking a foreign language every single day. Beyond the travel and the parties, Erasmus teaches something harder to measure: adaptability. Students learn to navigate unfamiliar bureaucracy, make friends across language barriers, and manage homesickness. Research shows that Erasmus alumni are often more open-minded and more likely to work internationally later in life. It's not just a trip — it's a small but real transformation.",
+    questions:["What is the main benefit of Erasmus, according to the text?","What difficulties do students face abroad?","Do you agree that living abroad changes people? Why or why not?"],
+    vocab:["independently","bureaucracy","homesickness","adaptability"]
+  },
+  writing:{
+    task:"Write 4–5 sentences in your daily journal about today: what you did, how you felt, and one new English word you learned.",
+    az:"Tapşırıq: Bugünkü gündəliyini yaz — 4-5 cümlə: nə etdin, özünü necə hiss etdin, öyrəndiyin yeni bir söz.",
+    checklist:["Used at least one Present Simple sentence","Used at least one Past Simple sentence","Included today's new vocabulary word"]
+  },
+  grammar:{
+    title:"Present Simple vs Present Continuous",
+    explanation:"Use Present Simple for routines, facts, and permanent situations (I work at a café). Use Present Continuous for actions happening right now or temporary situations (I am learning English this summer).",
+    examples:["I usually wake up at 7 AM. (routine → Present Simple)","I'm studying English right now. (happening now → Present Continuous)","She works in marketing, but this month she's working from Baku. (permanent vs temporary)"],
+    exercises:[
+      {q:"Complete: 'I ___ (study) English every day, but today I ___ (study) grammar specifically.'", answer:"study / am studying"},
+      {q:"Complete: 'She ___ (not/like) coffee.'", answer:"doesn't like"}
+    ]
+  }
+},
+"1-2": {
+  title:"Day 2 — Meeting New People", az:"Yeni insanlarla tanışlıq",
+  vocab:[
+    {word:"acquaintance", pron:"/əˈkweɪn.təns/", pos:"noun", meaning:"someone you know but not closely", example:"He's more of an acquaintance than a close friend.", collocations:["mutual acquaintance"], synonyms:["contact"], antonyms:["stranger","best friend"]},
+    {word:"break the ice", pron:"/breɪk ði aɪs/", pos:"idiom", meaning:"to start a conversation in a relaxed way", example:"I asked about her trip to break the ice.", collocations:[], synonyms:["start a conversation"], antonyms:[]},
+    {word:"in common", pron:"/ɪn ˈkɒm.ən/", pos:"expression", meaning:"sharing the same interest or quality", example:"We have a lot in common — we both love hiking.", collocations:["have something in common"], synonyms:["shared"], antonyms:["different"]},
+    {word:"catch up", pron:"/kætʃ ʌp/", pos:"phrasal verb", meaning:"to talk with someone about recent news", example:"Let's catch up over coffee next week.", collocations:["catch up with someone"], synonyms:["reconnect"], antonyms:[]},
+    {word:"approachable", pron:"/əˈprəʊ.tʃə.bəl/", pos:"adjective", meaning:"easy and pleasant to talk to", example:"Our teacher is very approachable — you can ask her anything.", collocations:["approachable person"], synonyms:["friendly","warm"], antonyms:["intimidating"]}
+  ],
+  quiz:[
+    {q:"To 'break the ice' means to...", options:["end a friendship","start a conversation comfortably","argue"], answer:1},
+    {q:"'We have a lot ___ common.'", options:["in","at","on"], answer:0},
+    {q:"An 'approachable' person is...", options:["scary","easy to talk to","always busy"], answer:1}
+  ],
+  speaking:{
+    warmup:"Practice saying 'Nice to meet you, I'm ___' with three different intonations: casual, formal, enthusiastic.",
+    task:"Role-play: You meet another Erasmus student at orientation. Introduce yourselves, find one thing in common, and exchange contact info. Speak both roles aloud.",
+    az:"Tapşırıq: Erasmus oriyentasiyasında başqa tələbə ilə tanış olursan. Tanış olun, ortaq bir şey tapın və əlaqə məlumatı mübadilə edin. Hər iki rolu səsli oyna.",
+    usefulPhrases:["Hi, I don't think we've met — I'm...","What brings you here?","Oh really? Me too!","We should definitely catch up sometime.","Do you have Instagram / WhatsApp?"],
+    connectors:["By the way,","Speaking of which,","Anyway,","So,"],
+    modelAnswer:"A: Hi, I don't think we've met — I'm Elvin. B: Nice to meet you, I'm Marta. What brings you here? A: I'm here for the ESC volunteering project. What about you? B: Oh, same here! We have a lot in common then. A: Definitely — we should catch up sometime. Do you have Instagram?"
+  },
+  listening:{
+    title:"Orientation Day Small Talk (Normal Speed)",
+    script:"So, where are you from originally? Oh, Poland, nice! I've never been, but I've heard the food is amazing. I'm from Italy myself — Turin, specifically. Is this your first time doing a project like this? Yeah, same here, I'm a bit nervous but excited. Do you want to grab a coffee later and figure out the schedule together?",
+    questions:[{q:"Where is the speaker from?", type:"short"},{q:"What do they suggest doing later?", type:"short"},{q:"True or False: Both speakers have done this kind of project before.", type:"tf", answer:"False — it's the first time for at least one speaker."}],
+    gapfill:"Is this your ____ (1) time doing a project like this? I'm a bit ____ (2) but excited.",
+    vocabFocus:["originally","nervous","figure out"]
+  },
+  reading:{
+    title:"The Art of Small Talk", topic:"Communication",
+    text:"Small talk often gets a bad reputation — people call it shallow or boring. But in reality, small talk is a social skill, and like any skill, it can be learned. The goal isn't to have a deep conversation immediately; it's to build comfort. Simple questions like 'How was your weekend?' or 'What do you do?' create an opening. The key is genuine curiosity: instead of waiting for your turn to speak, actually listen and ask a follow-up question. Over time, small talk often turns into real friendship — which is exactly how most Erasmus friendships begin.",
+    questions:["Why do people underestimate small talk?","What is the key skill mentioned in the text?","Describe a time small talk helped you make a friend."],
+    vocab:["reputation","genuine curiosity","follow-up question"]
+  },
+  writing:{
+    task:"Write a short informal message (WhatsApp style) to someone you just met at an event, suggesting you meet for coffee.",
+    az:"Tapşırıq: Tədbirdə tanış olduğun birinə qəhvə üçün görüşməyi təklif edən qısa WhatsApp mesajı yaz.",
+    checklist:["Friendly greeting","Reference to how you met","Clear suggestion with a time"]
+  },
+  grammar:{
+    title:"Question Forms",
+    explanation:"Wh- questions (What/Where/Why/How) need auxiliary verbs: 'Where do you live?' not 'Where you live?'. Yes/No questions invert the auxiliary: 'Do you like coffee?'",
+    examples:["What do you do for a living?","Where are you from?","Have you been to Spain before?"],
+    exercises:[{q:"Correct this: 'What you do here?'", answer:"What do you do here?"},{q:"Form a question: 'she / like / coffee'", answer:"Does she like coffee?"}]
+  }
+},
+"1-3": {
+  title:"Day 3 — Talking About Your Day", az:"Günün haqqında danışmaq",
+  vocab:[
+    {word:"exhausted", pron:"/ɪɡˈzɔː.stɪd/", pos:"adjective", meaning:"extremely tired", example:"After the long shift, I was completely exhausted.", collocations:["totally exhausted"], synonyms:["worn out"], antonyms:["energetic"]},
+    {word:"productive", pron:"/prəˈdʌk.tɪv/", pos:"adjective", meaning:"achieving a lot; effective", example:"Today was a really productive day at work.", collocations:["productive day","productive meeting"], synonyms:["efficient"], antonyms:["unproductive"]},
+    {word:"deal with", pron:"/diːl wɪð/", pos:"phrasal verb", meaning:"to handle a problem or situation", example:"I had to deal with a difficult customer today.", collocations:["deal with stress"], synonyms:["handle","manage"], antonyms:["ignore"]},
+    {word:"look forward to", pron:"/lʊk ˈfɔː.wəd tuː/", pos:"expression", meaning:"to feel excited about something in the future", example:"I'm looking forward to the weekend.", collocations:[], synonyms:["anticipate"], antonyms:["dread"]},
+    {word:"wind down", pron:"/waɪnd daʊn/", pos:"phrasal verb", meaning:"to relax after a busy period", example:"I like to wind down with a book before bed.", collocations:[], synonyms:["relax","unwind"], antonyms:["gear up"]}
+  ],
+  quiz:[
+    {q:"'I'm so tired' has the same meaning as...", options:["I'm exhausted","I'm productive","I'm looking forward"], answer:0},
+    {q:"'to deal with' means...", options:["to ignore","to handle","to celebrate"], answer:1},
+    {q:"'I look forward ___ seeing you.'", options:["to","at","for"], answer:0}
+  ],
+  speaking:{
+    warmup:"Say out loud 5 adjectives describing how you usually feel at the end of a workday.",
+    task:"Give a 1-minute spoken summary of your typical day, from waking up to going to bed, using at least 3 time connectors (first, then, after that, finally).",
+    az:"Tapşırıq: Səhər oyanmaqdan yatana qədər tipik günün haqqında 1 dəqiqəlik nitq söylə, ən azı 3 zaman bağlayıcısından istifadə et (əvvəlcə, sonra, bundan sonra, nəhayət).",
+    usefulPhrases:["My day usually starts with...","After that, I...","In the afternoon, I tend to...","By the evening, I'm usually...","I like to wind down by..."],
+    connectors:["First,","Then,","After that,","Later on,","Finally,"],
+    modelAnswer:"My day usually starts around 7, when I check messages and have breakfast. After that, I head to work at the café, where mornings are always the busiest. In the afternoon, I tend to deal with supplier calls and admin work. By the evening, I'm usually exhausted, so I like to wind down by watching something light or going for a walk. Overall, it's a productive but tiring routine."
+  },
+  listening:{
+    title:"Describing a Busy Day (American English, Normal Speed)",
+    script:"Man, today was intense. I had back-to-back meetings from nine until noon, then I barely had time to grab lunch before jumping on a call with a client. By three, I was already exhausted, but I still had to deal with a shipment issue. Honestly, I'm just looking forward to winding down tonight with some pizza and a movie.",
+    questions:[{q:"What does the speaker mean by 'back-to-back meetings'?", type:"short"},{q:"What problem did he deal with?", type:"short"},{q:"True or False: He plans to go out tonight.", type:"tf", answer:"False — he wants to relax at home."}],
+    gapfill:"By three, I was already ____ (1), but I still had to ____ (2) a shipment issue.",
+    vocabFocus:["back-to-back","shipment issue","wind down"]
+  },
+  reading:{
+    title:"The Myth of the Perfectly Productive Day", topic:"Lifestyle / Psychology",
+    text:"Social media is full of 5 AM routines and hour-by-hour productivity schedules, but psychologists warn that chasing a 'perfect day' can actually increase stress. Real productivity isn't about doing the maximum number of tasks; it's about doing the right tasks and allowing genuine rest. Studies on burnout show that people who schedule deliberate downtime — even just twenty minutes of walking — report higher energy the next day than those who work non-stop. The goal isn't to be busy all day; it's to end the day feeling like your time mattered.",
+    questions:["What is the 'myth' the title refers to?","What do studies on burnout suggest?","What does a 'productive day' mean to you personally?"],
+    vocab:["chasing","burnout","deliberate downtime"]
+  },
+  writing:{
+    task:"Write an email to a friend describing how your week has been so far (formal-informal mix, 5-6 sentences).",
+    az:"Tapşırıq: Dostuna bu həftənin necə keçdiyini izah edən e-poçt yaz (5-6 cümlə).",
+    checklist:["Greeting and sign-off","At least 2 phrasal verbs from today's vocabulary","A question at the end to keep the conversation going"]
+  },
+  grammar:{
+    title:"Time Connectors & Sentence Order",
+    explanation:"Time connectors (first, then, after that, later, finally) help organize spoken and written stories. They usually go at the beginning of a sentence, followed by a comma.",
+    examples:["First, I woke up. Then, I made coffee.","After that, I went to work.","Finally, I went to bed around midnight."],
+    exercises:[{q:"Put in order using connectors: wake up / eat breakfast / go to work", answer:"First, I wake up. Then, I eat breakfast. After that, I go to work."}]
+  }
+}
+};
+
+const GRAMMAR_LIBRARY = [
+ {topic:"Present Tenses", note:"Simple for routines/facts, Continuous for now/temporary."},
+ {topic:"Past Tenses", note:"Simple for finished actions, Continuous for background actions."},
+ {topic:"Future Forms", note:"'will' for predictions/decisions, 'going to' for plans, Present Continuous for arrangements."},
+ {topic:"Perfect Tenses", note:"Present Perfect connects past to now; Past Perfect shows 'past before past'."},
+ {topic:"Passive Voice", note:"Used when the action matters more than who did it: 'The project was completed on time.'"},
+ {topic:"Conditionals", note:"Zero (facts), First (real future), Second (unreal present), Third (unreal past)."},
+ {topic:"Relative Clauses", note:"who/which/that/where add extra info without starting a new sentence."},
+ {topic:"Modal Verbs", note:"can/could/should/must/might show ability, advice, obligation, possibility."},
+ {topic:"Articles", note:"a/an for first mention, the for something specific/already known."},
+ {topic:"Prepositions", note:"in/on/at for time and place — learn as fixed chunks, not rules."},
+ {topic:"Word Order", note:"Subject + Verb + Object + Place + Time is the standard English order."},
+ {topic:"Adjectives & Adverbs", note:"Adjectives describe nouns; adverbs describe verbs/adjectives, often end in -ly."},
+ {topic:"Conjunctions & Linking Words", note:"and/but/so/because/although connect ideas logically."},
+ {topic:"Question Forms", note:"Wh- word + auxiliary + subject + verb."},
+ {topic:"Negatives", note:"don't/doesn't/didn't + base verb; haven't/hasn't + past participle."}
+];
+
+const ERASMUS_VOCAB = [
+ {term:"host organisation", meaning:"the organisation abroad that receives and supervises the volunteer/student"},
+ {term:"learning agreement", meaning:"official document listing courses/activities agreed before the mobility"},
+ {term:"mobility project", meaning:"a general term for a study/volunteering period abroad"},
+ {term:"non-formal education", meaning:"learning that happens outside traditional classrooms (workshops, projects)"},
+ {term:"intercultural dialogue", meaning:"exchange of understanding between people from different cultures"},
+ {term:"conflict resolution", meaning:"methods used to solve disagreements peacefully within a team"},
+ {term:"stakeholder", meaning:"a person or group with an interest in a project's outcome"},
+ {term:"grassroots initiative", meaning:"a project started by ordinary community members, not top-down"},
+ {term:"soft skills", meaning:"personal qualities like communication, teamwork, adaptability"},
+ {term:"youth exchange", meaning:"a short program where young people from different countries meet and collaborate"},
+ {term:"call for participants", meaning:"an open invitation/announcement to apply for a project"},
+ {term:"reintegration", meaning:"the process of adjusting back to home life after time abroad"}
+];
+
+const ESC_INTERVIEW_QA = [
+ {q:"Why do you want to take part in this project?", model:"I've always wanted to work directly with young people and gain hands-on experience in non-formal education. This project matches my background in [field], and I believe I can also bring energy and reliability to the team."},
+ {q:"What skills can you bring to the team?", model:"I'm organised, I communicate clearly under pressure, and I've managed real responsibilities before — for example, running day-to-day operations for a small business. I also adapt quickly to new environments."},
+ {q:"How do you handle conflict within a team?", model:"I try to address it early and directly, but calmly — I listen to the other person's perspective first, then look for a solution that works for everyone rather than assigning blame."},
+ {q:"What do you hope to gain from this experience?", model:"Beyond improving my English, I want to grow more confident working in international, unfamiliar environments, and build a network of people with similar values."},
+ {q:"How would you deal with homesickness or culture shock?", model:"I'd stay in touch with family regularly, but also push myself to build new routines and friendships quickly rather than isolating myself — staying busy really helps."},
+ {q:"Describe a challenge you've overcome.", model:"When I started managing [business], I had no formal training, so I had to learn financial reporting and software systems on my own through trial and error — and now I've built tools that manage the whole operation."},
+ {q:"Why is volunteering important to you?", model:"I believe small consistent actions create real community impact, and volunteering lets me contribute directly rather than just talking about problems."},
+ {q:"How do you usually work in a team?", model:"I like to clarify roles early, communicate proactively if something changes, and stay flexible — I'd rather over-communicate than let something fall through the cracks."}
+];
+
+const MOVIES = [
+ {title:"The Devil Wears Prada", level:"B1-B2", genre:"Comedy-Drama", difficulty:"Medium", why:"Clear American English, workplace vocabulary, natural pacing.", vocab:["intern","deadline","ambitious","overwhelmed"], discussion:"Would you accept a demanding job for a big career opportunity?"},
+ {title:"Notting Hill", level:"B1", genre:"Romantic Comedy", difficulty:"Easy-Medium", why:"Clear British accents, everyday conversational English.", vocab:["awkward","overwhelmed","celebrity","humble"], discussion:"Describe a time you felt starstruck or nervous meeting someone."},
+ {title:"Freedom Writers", level:"B1-B2", genre:"Drama", difficulty:"Medium", why:"Strong themes for discussion, mix of accents, emotional vocabulary.", vocab:["diversity","tolerance","identity","perseverance"], discussion:"How can education change someone's life path?"},
+ {title:"Ted Lasso (TV series)", level:"B2", genre:"Comedy-Drama", difficulty:"Medium-High", why:"Idioms, British/American mix, teamwork themes relevant to Erasmus/volunteering.", vocab:["underdog","banter","resilience","mentor"], discussion:"What makes a good team leader, in your opinion?"},
+ {title:"Friends (TV series)", level:"B1-B2", genre:"Sitcom", difficulty:"Easy-Medium", why:"Classic for natural conversational English and everyday idioms.", vocab:["awkward","drama","commitment","roommate"], discussion:"Which character's communication style is most like yours?"}
+];
+
+const YOUTUBE_RECS = [
+ {name:"English with Lucy", type:"YouTube Channel", why:"Clear British pronunciation lessons, ideal for B1-B2 learners."},
+ {name:"BBC Learning English", type:"YouTube Channel", why:"Structured lessons with real-world topics and slower speech."},
+ {name:"TED Talks (various)", type:"TED Talks", why:"Great for advanced listening and picking up persuasive/formal vocabulary."},
+ {name:"Easy English", type:"YouTube Channel", why:"Real street interviews at natural speed with subtitles — excellent listening training."},
+ {name:"The Erasmus Life", type:"Travel Vlog", why:"Real Erasmus student experiences — motivating and topic-relevant."},
+ {name:"Luke's ENGLISH Podcast", type:"Podcast", why:"Long-form natural spoken English, great for immersion during commutes."}
+];
+
+/* ============================================================
+   SUPABASE SETUP
+   ============================================================ */
+const SUPABASE_URL = "https://wrkdqsnrpojqyftkwvlv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indya2Rxc25ycG9qcXlmdGt3dmx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTU1NjYsImV4cCI6MjA5OTA5MTU2Nn0.TuBIFXdznRyRq8K1YOqT5WLiEdbDY2vRaXIXTGrMJUk";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let supabaseReady = false;
+async function ensureAuth(){
+  if(supabaseReady) return;
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){
+    const { error } = await supabase.auth.signInAnonymously();
+    if(error){
+      console.error("Anonymous sign-in failed:", error.message);
+      throw new Error("AUTH_FAILED");
+    }
+  }
+  supabaseReady = true;
+}
+
+/* ============================================================
+   STORAGE HELPERS (backed by Supabase table `app_state`)
+   ============================================================ */
+const DEFAULT_PROGRESS = {
+  level:"B1", target:"B2", xp:0, streak:0, lastActiveDate:null,
+  completedDays:{}, // "week-day": true
+  vocabLearned:0, speakingDone:0, listeningDone:0, readingDone:0, writingDone:0, grammarDone:0,
+  dailyLog:[], // {date, vocab, speaking, listening, reading, writing, grammar}
+  currentWeek:1, currentDay:1
+};
+
+async function getStateRow(id){
+  try{
+    await ensureAuth();
+    const { data, error } = await supabase.from('app_state').select('value').eq('id', id).maybeSingle();
+    if(error){ console.error(error); return null; }
+    return data ? data.value : null;
+  }catch(e){ console.error(e); return null; }
+}
+async function setStateRow(id, value){
+  try{
+    await ensureAuth();
+    const { error } = await supabase.from('app_state').upsert({ id, value, updated_at: new Date().toISOString() });
+    if(error) console.error(error);
+  }catch(e){ console.error(e); }
+}
+
+async function loadProgress(){
+  const v = await getStateRow('progress');
+  return v || JSON.parse(JSON.stringify(DEFAULT_PROGRESS));
+}
+async function saveProgress(p){ await setStateRow('progress', p); }
+
+async function loadTheme(){
+  const v = await getStateRow('theme');
+  return (v && v.theme) || 'light';
+}
+async function saveTheme(t){ await setStateRow('theme', {theme:t}); }
+
+async function getCachedLesson(key){ return await getStateRow('lesson:'+key); }
+async function setCachedLesson(key, data){ await setStateRow('lesson:'+key, data); }
+
+async function getChatHistory(){
+  const v = await getStateRow('coach_chat');
+  return (v && v.messages) || [];
+}
+async function saveChatHistory(h){ await setStateRow('coach_chat', {messages: h.slice(-30)}); }
+
+/* ============================================================
+   CLAUDE API HELPER
+   ============================================================ */
+async function callClaude(messages, systemPrompt, maxTokens){
+  const body = {
+    model:"claude-sonnet-4-6",
+    max_tokens: maxTokens || 1000,
+    messages: messages
+  };
+  if(systemPrompt) body.system = systemPrompt;
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  });
+  const data = await response.json();
+  const textBlocks = (data.content||[]).filter(b=>b.type==="text").map(b=>b.text);
+  return textBlocks.join("\n");
+}
+
+function extractJSON(text){
+  let t = text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  return JSON.parse(t);
+}
+
+async function generateDailyLesson(week, day, weekMeta){
+  const sys = "You are an expert B1-to-B2 English curriculum designer creating content for an Azerbaijani Erasmus/ESC applicant in Baku. Respond ONLY with valid JSON, no preamble, no markdown fences. The JSON schema must exactly match: {\"title\":string,\"az\":string,\"vocab\":[{\"word\":string,\"pron\":string,\"pos\":string,\"meaning\":string,\"example\":string,\"collocations\":[string],\"synonyms\":[string],\"antonyms\":[string]}] (5 items),\"quiz\":[{\"q\":string,\"options\":[string,string,string],\"answer\":number}] (3 items),\"speaking\":{\"warmup\":string,\"task\":string,\"az\":string,\"usefulPhrases\":[string],\"connectors\":[string],\"modelAnswer\":string},\"listening\":{\"title\":string,\"script\":string,\"questions\":[{\"q\":string,\"type\":string,\"answer\":string}],\"gapfill\":string,\"vocabFocus\":[string]},\"reading\":{\"title\":string,\"topic\":string,\"text\":string,\"questions\":[string],\"vocab\":[string]},\"writing\":{\"task\":string,\"az\":string,\"checklist\":[string]},\"grammar\":{\"title\":string,\"explanation\":string,\"examples\":[string],\"exercises\":[{\"q\":string,\"answer\":string}]}}. All Azerbaijani fields (az) must be real natural Azerbaijani. Keep vocabulary strictly B1-B2 level and thematically tied to the week's theme.";
+  const usr = `Create Day ${day} of Week ${week} (theme: "${weekMeta.theme}"). Weekly goals: ${weekMeta.goals.join('; ')}. Speaking priority is highest, so make the speaking task rich and specific to real Erasmus/volunteering/everyday-life situations. Vary listening accents/speeds across days.`;
+  const raw = await callClaude([{role:"user", content:usr}], sys, 3000);
+  return extractJSON(raw);
+}
+
+async function generateWeeklyTest(week, weekMeta){
+  const sys = "You are an English test designer. Respond ONLY with valid JSON matching: {\"vocab\":[{\"q\":string,\"options\":[string,string,string,string],\"answer\":number}] (5 items),\"grammar\":[{\"q\":string,\"options\":[string,string,string,string],\"answer\":number}] (5 items),\"reading\":{\"text\":string,\"questions\":[{\"q\":string,\"options\":[string,string,string,string],\"answer\":number}] (3 items)},\"writing\":{\"prompt\":string},\"speaking\":{\"prompt\":string}}. No markdown, no preamble.";
+  const usr = `Create a Week ${week} test for the theme "${weekMeta.theme}", B1-B2 level, related to: ${weekMeta.goals.join('; ')}.`;
+  const raw = await callClaude([{role:"user", content:usr}], sys, 2200);
+  return extractJSON(raw);
+}
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+let STATE = {
+  route:"dashboard",
+  theme:"light",
+  progress: null,
+  sidebarOpen:false,
+  selWeek:1, selDay:1,
+  lessonCache:{}, // in-memory cache mirroring storage
+  lessonLoading:false,
+  testCache:{},
+  testLoading:false,
+  chat:[],
+  chatLoading:false,
+  sbSlots:{subject:null,verb:null,object:null,time:null,place:null},
+};
+
+const root = document.getElementById('root');
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function computeOverallProgress(p){
+  const totalDays = 56;
+  const done = Object.keys(p.completedDays).length;
+  return Math.min(100, Math.round((done/totalDays)*100));
+}
+
+async function markDayComplete(week, day){
+  const key = week+'-'+day;
+  if(!STATE.progress.completedDays[key]){
+    STATE.progress.completedDays[key] = true;
+    STATE.progress.xp += 20;
+    const today = todayStr();
+    if(STATE.progress.lastActiveDate !== today){
+      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+      STATE.progress.streak = (STATE.progress.lastActiveDate === yesterday) ? STATE.progress.streak+1 : 1;
+      STATE.progress.lastActiveDate = today;
+    }
+    STATE.progress.dailyLog.push({date:today, week, day});
+    await saveProgress(STATE.progress);
+  }
+  render();
+}
+
+async function markTaskDone(field){
+  STATE.progress[field] = (STATE.progress[field]||0) + 1;
+  await saveProgress(STATE.progress);
+  render();
+}
+
+/* ============================================================
+   RENDER: LAYOUT
+   ============================================================ */
+const NAV = [
+ {id:"dashboard", icon:"◆", label:"Dashboard"},
+ {id:"roadmap", icon:"▤", label:"8-Week Roadmap"},
+ {id:"lesson", icon:"✎", label:"Today's Lesson"},
+ {id:"sentence", icon:"⌗", label:"Sentence Builder"},
+ {id:"erasmus", icon:"✈", label:"Erasmus & ESC"},
+ {id:"movies", icon:"▶", label:"Movies"},
+ {id:"youtube", icon:"▷", label:"YouTube & Podcasts"},
+ {id:"tests", icon:"✓", label:"Weekly Tests"},
+ {id:"coach", icon:"◐", label:"AI Coach"},
+ {id:"analytics", icon:"▲", label:"Analytics"},
+];
+
+function layout(innerHTML){
+  return `
+  <div class="app">
+    <div class="sidebar ${STATE.sidebarOpen?'open':''}">
+      <div class="sidebar-brand">
+        <div class="mark">Compass<span>.</span></div>
+        <div class="sub">B1 → B2 · Erasmus Journey</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Study</div>
+        ${NAV.map(n=>`<button class="nav-item ${STATE.route===n.id?'active':''}" data-route="${n.id}"><span class="nav-icon">${n.icon}</span>${n.label}</button>`).join('')}
+      </div>
+      <div class="sidebar-foot">Salam, Ilkin! Keep going — 8 həftə, 1 addım.</div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="icon-btn hamburger" id="hamburgerBtn">☰</button>
+          <div>
+            <h1>${pageTitle()}</h1>
+            <div class="az">${pageSubtitleAz()}</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="themeToggle" title="Toggle dark/light">${STATE.theme==='dark'?'☀':'☾'}</button>
+        </div>
+      </div>
+      <div class="content">${innerHTML}</div>
+    </div>
+  </div>`;
+}
+
+function pageTitle(){
+  const map = {dashboard:"Your Dashboard", roadmap:"8-Week Roadmap", lesson:"Today's Lesson", sentence:"Sentence Builder", erasmus:"Erasmus & ESC English", movies:"Movie Recommendations", youtube:"YouTube, Podcasts & TED Talks", tests:"Weekly Tests", coach:"AI English Coach", analytics:"Progress Analytics"};
+  return map[STATE.route]||"";
+}
+function pageSubtitleAz(){
+  const map = {dashboard:"Bugünkü irəliləyişinə bax", roadmap:"8 həftəlik tam proqram", lesson:"Bugünkü dərsini tamamla", sentence:"Cümlə qurmağı məşq et", erasmus:"Erasmus və ESC üçün xüsusi lüğət və müsahibə sualları", movies:"B1-B2 səviyyəsi üçün tövsiyə olunan filmlər", youtube:"Dinləmə bacarığın üçün tövsiyələr", tests:"Hər həftənin sonunda özünü yoxla", coach:"Şəxsi AI ingilis dili müəllimin", analytics:"İrəliləyişini qrafiklərlə izlə"};
+  return map[STATE.route]||"";
+}
+
+/* ============================================================
+   RENDER: DASHBOARD
+   ============================================================ */
+function renderDashboard(){
+  const p = STATE.progress;
+  const overall = computeOverallProgress(p);
+  const wk = WEEKS[STATE.selWeek-1];
+  return `
+  <div class="passport-wrap card" style="margin-bottom:20px;">
+    <div class="passport">
+      <div class="p-title">Language Passport</div>
+      <div class="p-level">${p.level}</div>
+      <div class="p-target">Target: ${p.target} by end of Week 8</div>
+      <div style="margin-top:18px;">
+        <div class="pbar-track"><div class="pbar-fill" style="width:${overall}%"></div></div>
+        <div style="font-size:.74rem; margin-top:6px; opacity:.8;">${overall}% of the 8-week journey complete</div>
+      </div>
+    </div>
+    <div class="stamps">
+      <div class="section-sub" style="margin-bottom:2px;">Weekly stamps — collect one per completed week</div>
+      <div class="stamps-grid">
+        ${WEEKS.map(w=>{
+          const daysDone = Object.keys(p.completedDays).filter(k=>k.startsWith(w.n+'-')).length;
+          const cls = daysDone>=7 ? 'done' : (w.n===p.currentWeek?'current':'');
+          return `<div class="stamp ${cls}" title="Week ${w.n}: ${w.theme}">W${w.n}</div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex; gap:22px; margin-top:18px; flex-wrap:wrap;">
+        <div class="stat"><div class="num">🔥 ${p.streak}</div><div class="lbl">Day Streak</div></div>
+        <div class="stat"><div class="num">${p.xp}</div><div class="lbl">XP Earned</div></div>
+        <div class="stat"><div class="num">${p.vocabLearned}</div><div class="lbl">Words Learned</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom:20px;">
+    <div class="card stat"><div class="num">${p.speakingDone}</div><div class="lbl">🗣 Speaking Tasks</div></div>
+    <div class="card stat"><div class="num">${p.listeningDone}</div><div class="lbl">🎧 Listening Tasks</div></div>
+    <div class="card stat"><div class="num">${p.readingDone}</div><div class="lbl">📖 Reading Tasks</div></div>
+    <div class="card stat"><div class="num">${p.writingDone}</div><div class="lbl">✍ Writing Tasks</div></div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h2 class="section-title">Today's Mission</h2>
+      <div class="section-sub">Bugünkü tapşırığın</div>
+      <p style="font-size:.9rem; margin-bottom:10px;">Week ${p.currentWeek}, Day ${p.currentDay} — <b>${wk.theme}</b></p>
+      <ul class="goal-list">${wk.goals.map(g=>`<li>${g}</li>`).join('')}</ul>
+      <button class="btn gold" style="margin-top:14px;" data-route="lesson">Go to Today's Lesson →</button>
+    </div>
+    <div class="card">
+      <h2 class="section-title">This Week at a Glance</h2>
+      <div class="section-sub">${wk.az}</div>
+      <table class="simple">
+        <tr><th>Skill</th><th>Focus</th></tr>
+        <tr><td>🗣 Speaking</td><td>${wk.speaking[0]}</td></tr>
+        <tr><td>🎧 Listening</td><td>${wk.listening[0]}</td></tr>
+        <tr><td>📖 Reading</td><td>${wk.reading[0]}</td></tr>
+        <tr><td>✍ Writing</td><td>${wk.writing[0]}</td></tr>
+        <tr><td>📐 Grammar</td><td>${wk.grammar[0]}</td></tr>
+      </table>
+      <div class="az-box"><b>Mini Challenge:</b> ${wk.challenge}</div>
+    </div>
+  </div>
+  `;
+}
+
+/* ============================================================
+   RENDER: ROADMAP
+   ============================================================ */
+function renderRoadmap(){
+  return `
+  <div class="grid" style="grid-template-columns:1fr; gap:16px;">
+  ${WEEKS.map(w=>{
+    const daysDone = Object.keys(STATE.progress.completedDays).filter(k=>k.startsWith(w.n+'-')).length;
+    return `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <span class="tag gold">Week ${w.n}</span>
+          <h3 style="font-family:var(--font-display); font-size:1.2rem; margin-top:6px;">${w.theme}</h3>
+          <div class="section-sub" style="margin-bottom:6px;">${w.az}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="stat"><div class="num" style="font-size:1.2rem;">${daysDone}/7</div><div class="lbl">days done</div></div>
+        </div>
+      </div>
+      <div class="grid grid-3" style="margin-top:10px;">
+        <div><b style="font-size:.82rem;">🎯 Goals</b><ul class="goal-list">${w.goals.map(g=>`<li>${g}</li>`).join('')}</ul></div>
+        <div><b style="font-size:.82rem;">Skill Focus</b><ul class="goal-list">
+          <li>🗣 ${w.speaking[0]}</li><li>🎧 ${w.listening[0]}</li><li>📖 ${w.reading[0]}</li><li>✍ ${w.writing[0]}</li><li>📐 ${w.grammar[0]}</li>
+        </ul></div>
+        <div><b style="font-size:.82rem;">Mini Challenge</b><p style="font-size:.85rem; margin-top:6px;">${w.challenge}</p>
+          <b style="font-size:.82rem; display:block; margin-top:10px;">Weekly Review</b><p style="font-size:.85rem; margin-top:4px;">${w.review}</p>
+        </div>
+      </div>
+      <button class="btn ghost sm" style="margin-top:12px;" data-week-jump="${w.n}">Open Week ${w.n} lessons →</button>
+    </div>`;
+  }).join('')}
+  </div>`;
+}
+
+/* ============================================================
+   RENDER: LESSON
+   ============================================================ */
+function lessonKey(){ return STATE.selWeek+'-'+STATE.selDay; }
+
+async function ensureLessonLoaded(){
+  const key = lessonKey();
+  if(AUTHORED[key] || STATE.lessonCache[key]) return;
+  const cached = await getCachedLesson(key);
+  if(cached){ STATE.lessonCache[key] = cached; render(); }
+}
+async function ensureTestLoaded(week){
+  if(STATE.testCache[week]) return;
+  const cached = await getStateRow('test:'+week);
+  if(cached){ STATE.testCache[week] = cached; render(); }
+}
+
+function renderLesson(){
+  const wk = WEEKS[STATE.selWeek-1];
+  const key = lessonKey();
+  const authored = AUTHORED[key];
+  const cached = STATE.lessonCache[key];
+  const lesson = authored || cached;
+
+  const weekStrip = `<div class="week-strip">${WEEKS.map(w=>`<button class="week-chip ${w.n===STATE.selWeek?'active':''}" data-sel-week="${w.n}">Week ${w.n}<span class="wk-theme">${w.theme}</span></button>`).join('')}</div>`;
+  const dayTabs = `<div class="day-tabs">${[1,2,3,4,5,6,7].map(d=>{
+    const done = !!STATE.progress.completedDays[STATE.selWeek+'-'+d];
+    return `<button class="day-tab ${d===STATE.selDay?'active':''}" data-sel-day="${d}">Day ${d} ${done?'<span class="dot"></span>':''}</button>`;
+  }).join('')}</div>`;
+
+  if(!lesson){
+    return weekStrip + dayTabs + `
+    <div class="card empty">
+      <div class="big">📘</div>
+      <p style="margin-bottom:14px;">This lesson hasn't been generated yet. Your AI coach can build it now — fully matched to Week ${STATE.selWeek}'s theme (<b>${wk.theme}</b>), with vocabulary, speaking, listening, reading, writing and grammar.</p>
+      <button class="btn gold" id="genLessonBtn" ${STATE.lessonLoading?'disabled':''}>${STATE.lessonLoading?'<span class="loader"></span> Generating…':'✨ Generate Day '+STATE.selDay+' Lesson'}</button>
+    </div>`;
+  }
+
+  const done = !!STATE.progress.completedDays[key];
+
+  return weekStrip + dayTabs + `
+  <div class="card" style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <h2 class="section-title">${lesson.title}</h2>
+      <div class="section-sub">${lesson.az}</div>
+    </div>
+    <button class="btn ${done?'teal':'gold'}" id="completeDayBtn">${done?'✓ Day Complete':'Mark Day Complete'}</button>
+  </div>
+
+  <div class="section-block">
+    <h3>📚 Vocabulary <span class="tag">${lesson.vocab.length} words</span></h3>
+    ${lesson.vocab.map((v,i)=>`
+      <div class="vocab-card">
+        <div class="vocab-word">${v.word}<span class="pron">${v.pron}</span></div>
+        <div class="vocab-meta">${v.pos} — ${v.meaning}</div>
+        <div class="vocab-meta" style="font-style:italic;">"${v.example}"</div>
+        <div class="chips">
+          ${(v.collocations||[]).map(c=>`<span class="chip">🔗 ${c}</span>`).join('')}
+          ${(v.synonyms||[]).map(c=>`<span class="chip">≈ ${c}</span>`).join('')}
+          ${(v.antonyms||[]).map(c=>`<span class="chip">✕ ${c}</span>`).join('')}
+        </div>
+      </div>`).join('')}
+    <div class="qbox">
+      <b style="font-size:.85rem;">Mini Quiz</b>
+      ${(lesson.quiz||[]).map((qz,i)=>`
+        <div style="margin-top:10px;">
+          <div style="font-size:.86rem;">${i+1}. ${qz.q}</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+            ${qz.options.map((o,oi)=>`<button class="btn ghost sm quiz-opt" data-quiz="${i}" data-opt="${oi}" data-correct="${qz.answer}">${o}</button>`).join('')}
+          </div>
+          <div class="quiz-feedback" id="qf-${i}" style="font-size:.8rem; margin-top:4px;"></div>
+        </div>`).join('')}
+    </div>
+    <button class="btn ghost sm" data-task-done="vocabLearned">✓ Mark vocabulary studied (+${lesson.vocab.length} words)</button>
+  </div>
+
+  <div class="section-block">
+    <h3>🗣 Speaking <span class="tag gold">Top Priority</span></h3>
+    <div class="qbox">
+      <div class="az-box"><b>Isinmə / Warm-up:</b> ${lesson.speaking.warmup}</div>
+      <p style="font-weight:600; margin-top:8px;">${lesson.speaking.task}</p>
+      <div class="az-box"><b>Tapşırıq:</b> ${lesson.speaking.az}</div>
+      <b style="font-size:.8rem;">Useful phrases:</b>
+      <div class="chips">${lesson.speaking.usefulPhrases.map(p=>`<span class="chip">${p}</span>`).join('')}</div>
+      <b style="font-size:.8rem; display:block; margin-top:8px;">Connectors:</b>
+      <div class="chips">${lesson.speaking.connectors.map(p=>`<span class="chip">${p}</span>`).join('')}</div>
+      <textarea rows="3" placeholder="Type notes or a transcript of what you said out loud..."></textarea>
+      <button class="reveal-btn" data-reveal="speak-model">Show model answer</button>
+      <div class="model-answer" id="speak-model">${lesson.speaking.modelAnswer}</div>
+      <button class="btn ghost sm" style="margin-top:8px;" data-task-done="speakingDone">✓ I completed this speaking task</button>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h3>🎧 Listening</h3>
+    <div class="qbox">
+      <b>${lesson.listening.title}</b>
+      <button class="reveal-btn" data-reveal="listen-script">Show script (listen with a TTS reader first if possible)</button>
+      <div class="model-answer" id="listen-script">${lesson.listening.script}</div>
+      ${(lesson.listening.questions||[]).map((q,i)=>`
+        <div style="margin-top:8px; font-size:.86rem;"><b>${i+1}.</b> ${q.q} ${q.type==='tf'?'<i>(True/False)</i>':''}
+        <input type="text" placeholder="Your answer..." style="width:100%; margin-top:4px; padding:6px 8px; border-radius:6px; border:1px solid var(--line); background:var(--paper);">
+        </div>`).join('')}
+      <div class="az-box" style="margin-top:10px;"><b>Gap fill:</b> ${lesson.listening.gapfill}</div>
+      <b style="font-size:.8rem;">Vocabulary focus:</b>
+      <div class="chips">${(lesson.listening.vocabFocus||[]).map(v=>`<span class="chip">${v}</span>`).join('')}</div>
+      <button class="btn ghost sm" style="margin-top:8px;" data-task-done="listeningDone">✓ I completed this listening task</button>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h3>📖 Reading <span class="tag">${lesson.reading.topic}</span></h3>
+    <div class="qbox">
+      <b>${lesson.reading.title}</b>
+      <p style="margin-top:8px; font-size:.9rem; line-height:1.6;">${lesson.reading.text}</p>
+      <b style="font-size:.8rem; display:block; margin-top:8px;">Questions:</b>
+      <ul class="goal-list">${(lesson.reading.questions||[]).map(q=>`<li>${q}</li>`).join('')}</ul>
+      <b style="font-size:.8rem;">Key vocabulary:</b>
+      <div class="chips">${(lesson.reading.vocab||[]).map(v=>`<span class="chip">${v}</span>`).join('')}</div>
+      <button class="btn ghost sm" style="margin-top:8px;" data-task-done="readingDone">✓ I completed this reading task</button>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h3>✍ Writing</h3>
+    <div class="qbox">
+      <p style="font-weight:600;">${lesson.writing.task}</p>
+      <div class="az-box"><b>Tapşırıq:</b> ${lesson.writing.az}</div>
+      <textarea rows="5" placeholder="Write your answer here..."></textarea>
+      <b style="font-size:.8rem;">Self-check:</b>
+      <ul class="goal-list">${(lesson.writing.checklist||[]).map(c=>`<li>${c}</li>`).join('')}</ul>
+      <button class="btn ghost sm" data-task-done="writingDone">✓ I completed this writing task</button>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <h3>📐 Grammar</h3>
+    <div class="qbox">
+      <b>${lesson.grammar.title}</b>
+      <p style="margin-top:6px; font-size:.88rem;">${lesson.grammar.explanation}</p>
+      <b style="font-size:.8rem; display:block; margin-top:8px;">Examples:</b>
+      <ul class="goal-list">${(lesson.grammar.examples||[]).map(e=>`<li>${e}</li>`).join('')}</ul>
+      <b style="font-size:.8rem; display:block; margin-top:8px;">Exercises:</b>
+      ${(lesson.grammar.exercises||[]).map((ex,i)=>`
+        <div style="margin-top:6px; font-size:.86rem;">${i+1}. ${ex.q}
+        <button class="reveal-btn" data-reveal="gram-${i}">Show answer</button>
+        <div class="model-answer" id="gram-${i}" style="display:inline;">→ ${ex.answer}</div></div>`).join('')}
+      <button class="btn ghost sm" style="margin-top:8px;" data-task-done="grammarDone">✓ I completed this grammar task</button>
+    </div>
+  </div>
+  `;
+}
+
+/* ============================================================
+   RENDER: SENTENCE BUILDER
+   ============================================================ */
+const SB_POOLS = {
+  subject:["I","She","We","My colleagues","The volunteers","Erasmus students"],
+  verb:["are discussing","have finished","will present","enjoyed","are preparing","talked about"],
+  object:["the project plan","a new idea","the workshop","our experience","the schedule","local culture"],
+  time:["this morning","last week","before the deadline","every day","during the event","right now"],
+  place:["at the office","in the city center","during the workshop","at the host organisation","online","in the meeting room"]
+};
+const SB_COLORS = {subject:"#2E6F6B", verb:"#C9A227", object:"#B14A3B", time:"#3C4E68", place:"#4E938F"};
+
+function renderSentenceBuilder(){
+  const s = STATE.sbSlots;
+  const order = ["subject","verb","object","place","time"];
+  const sentence = order.map(k=>s[k]).filter(Boolean).join(' ');
+  return `
+  <div class="card" style="margin-bottom:20px;">
+    <h2 class="section-title">Build a Natural English Sentence</h2>
+    <div class="section-sub">Cümlə hissələrini seç və təbii ingiliscə cümlə qur.</div>
+    <div class="sb-slots">
+      ${order.map(k=> s[k] ? `<span class="sb-slot" style="background:${SB_COLORS[k]}">${s[k]}</span>` : `<span class="sb-slot" style="background:var(--line); color:var(--ink-soft);">${k}</span>`).join('')}
+    </div>
+    ${sentence ? `<div class="az-box"><b>Your sentence:</b> ${sentence}.</div>` : ''}
+    ${order.map(k=>`
+      <div class="sb-pool">
+        <div class="sb-pool-label">${k}</div>
+        ${SB_POOLS[k].map(opt=>`<button class="sb-chip" data-sb-key="${k}" data-sb-val="${opt}">${opt}</button>`).join('')}
+      </div>`).join('')}
+    <button class="btn ghost sm" id="sbReset">Reset</button>
+  </div>
+  <div class="card">
+    <h2 class="section-title">Useful Sentence Patterns</h2>
+    <ul class="goal-list">
+      <li>Subject + Verb + Object + Place + Time — "We discussed the project at the office this morning."</li>
+      <li>Opinion pattern: "In my opinion, + [clause], because + [reason]."</li>
+      <li>Comparison pattern: "Unlike + [X], + [Y] + [difference]."</li>
+      <li>Result pattern: "[Cause], so + [result]." / "Because of + [cause], + [result]."</li>
+      <li>Contrast pattern: "Although + [clause A], + [clause B]."</li>
+    </ul>
+  </div>`;
+}
+
+/* ============================================================
+   RENDER: ERASMUS
+   ============================================================ */
+function renderErasmus(){
+  return `
+  <div class="card" style="margin-bottom:18px;">
+    <h2 class="section-title">Erasmus & ESC Vocabulary</h2>
+    <div class="section-sub">Erasmus və ESC layihələri üçün xüsusi terminlər</div>
+    <div class="grid grid-2">
+      ${ERASMUS_VOCAB.map(v=>`<div class="vocab-card"><div class="vocab-word">${v.term}</div><div class="vocab-meta">${v.meaning}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <h2 class="section-title">Mock Interview Questions & Model Answers</h2>
+    <div class="section-sub">Real ESC/Erasmus interview questions with model answers you can adapt</div>
+    ${ESC_INTERVIEW_QA.map((qa,i)=>`
+      <div class="qbox">
+        <b>${i+1}. ${qa.q}</b>
+        <button class="reveal-btn" data-reveal="esc-${i}">Show model answer</button>
+        <div class="model-answer" id="esc-${i}">${qa.model}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ============================================================
+   RENDER: MOVIES / YOUTUBE
+   ============================================================ */
+function renderMovies(){
+  return `<div class="card"><h2 class="section-title">Movies & TV Shows for B1-B2 Learners</h2>
+  ${MOVIES.map(m=>`
+    <div class="movie-card">
+      <div class="poster">▶</div>
+      <div>
+        <b>${m.title}</b> <span class="tag">${m.level}</span> <span class="tag gold">${m.genre}</span>
+        <div class="vocab-meta">Difficulty: ${m.difficulty}</div>
+        <div class="vocab-meta">${m.why}</div>
+        <div class="chips">${m.vocab.map(v=>`<span class="chip">${v}</span>`).join('')}</div>
+        <div class="az-box" style="margin-top:6px;"><b>Discuss:</b> ${m.discussion}</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+function renderYoutube(){
+  return `<div class="card"><h2 class="section-title">YouTube Channels, Podcasts & TED Talks</h2>
+  ${YOUTUBE_RECS.map(y=>`
+    <div class="yt-card">
+      <div class="poster">▷</div>
+      <div><b>${y.name}</b> <span class="tag">${y.type}</span><div class="vocab-meta">${y.why}</div></div>
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ============================================================
+   RENDER: TESTS
+   ============================================================ */
+function renderTests(){
+  const wk = WEEKS[STATE.selWeek-1];
+  const test = STATE.testCache[STATE.selWeek];
+  const weekStrip = `<div class="week-strip">${WEEKS.map(w=>`<button class="week-chip ${w.n===STATE.selWeek?'active':''}" data-sel-week-test="${w.n}">Week ${w.n}</button>`).join('')}</div>`;
+  if(!test){
+    return weekStrip + `<div class="card empty"><div class="big">✓</div>
+    <p style="margin-bottom:14px;">No test generated yet for Week ${STATE.selWeek} (<b>${wk.theme}</b>). Generate a full vocabulary, grammar, reading, writing and speaking test.</p>
+    <button class="btn gold" id="genTestBtn" ${STATE.testLoading?'disabled':''}>${STATE.testLoading?'<span class="loader"></span> Generating…':'✨ Generate Week '+STATE.selWeek+' Test'}</button>
+    </div>`;
+  }
+  return weekStrip + `
+  <div class="card" style="margin-bottom:16px;"><h2 class="section-title">Vocabulary Test</h2>
+  ${test.vocab.map((q,i)=>`<div class="qbox"><b>${i+1}. ${q.q}</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">${q.options.map((o,oi)=>`<button class="btn ghost sm test-opt" data-tkey="vocab" data-ti="${i}" data-oi="${oi}" data-correct="${q.answer}">${o}</button>`).join('')}</div><div class="quiz-feedback" id="tf-vocab-${i}"></div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-bottom:16px;"><h2 class="section-title">Grammar Test</h2>
+  ${test.grammar.map((q,i)=>`<div class="qbox"><b>${i+1}. ${q.q}</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">${q.options.map((o,oi)=>`<button class="btn ghost sm test-opt" data-tkey="grammar" data-ti="${i}" data-oi="${oi}" data-correct="${q.answer}">${o}</button>`).join('')}</div><div class="quiz-feedback" id="tf-grammar-${i}"></div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-bottom:16px;"><h2 class="section-title">Reading Test</h2>
+  <p style="font-size:.88rem; margin-bottom:10px;">${test.reading.text}</p>
+  ${test.reading.questions.map((q,i)=>`<div class="qbox"><b>${i+1}. ${q.q}</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">${q.options.map((o,oi)=>`<button class="btn ghost sm test-opt" data-tkey="reading" data-ti="${i}" data-oi="${oi}" data-correct="${q.answer}">${o}</button>`).join('')}</div><div class="quiz-feedback" id="tf-reading-${i}"></div></div>`).join('')}
+  </div>
+  <div class="grid grid-2">
+    <div class="card"><h3>✍ Writing Test</h3><p style="font-size:.88rem; margin:8px 0;">${test.writing.prompt}</p><textarea rows="5" placeholder="Write your response..."></textarea></div>
+    <div class="card"><h3>🗣 Speaking Test</h3><p style="font-size:.88rem; margin:8px 0;">${test.speaking.prompt}</p><textarea rows="5" placeholder="Type notes on what you said aloud..."></textarea></div>
+  </div>
+  <div style="margin-top:14px;"><span id="testScore" class="tag gold">Score: 0/${test.vocab.length+test.grammar.length+test.reading.questions.length}</span></div>
+  `;
+}
+
+/* ============================================================
+   RENDER: AI COACH
+   ============================================================ */
+function renderCoach(){
+  return `
+  <div class="card">
+    <h2 class="section-title">Your Personal AI English Coach</h2>
+    <div class="section-sub">Qrammatikanı düzəldir, lüğəti inkişaf etdirir, danışıq sualları verir, motivasiya edir.</div>
+    <div class="chat-window" id="chatWindow">
+      ${STATE.chat.length===0 ? `<div class="msg ai">Salam Ilkin! I'm your AI English coach. Tell me about your day in English, ask me to correct a sentence, or ask for today's speaking question. Let's go! 🚀</div>` : ''}
+      ${STATE.chat.map(m=>`<div class="msg ${m.role==='user'?'user':'ai'}">${m.content}</div>`).join('')}
+      ${STATE.chatLoading ? `<div class="msg ai"><span class="loader"></span> thinking...</div>`:''}
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Write in English (or ask in Azerbaijani)..." />
+      <button class="btn gold" id="chatSendBtn">Send</button>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+      <button class="btn ghost sm" data-quick="Give me a random speaking question about Erasmus for practice.">🎲 Speaking question</button>
+      <button class="btn ghost sm" data-quick="Correct this sentence and explain the mistake: I am agree with you about this topic.">✏️ Correct a sentence</button>
+      <button class="btn ghost sm" data-quick="Motivate me to keep studying English today in 2 sentences.">💪 Motivate me</button>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   RENDER: ANALYTICS
+   ============================================================ */
+let chartInstances = [];
+function renderAnalytics(){
+  return `
+  <div class="grid grid-2" style="margin-bottom:18px;">
+    <div class="card"><h3 style="margin-bottom:10px;">Daily Activity (last 14 days)</h3><canvas id="chartDaily" height="180"></canvas></div>
+    <div class="card"><h3 style="margin-bottom:10px;">Tasks by Skill</h3><canvas id="chartSkills" height="180"></canvas></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:10px;">Predicted Level Progress</h3>
+    <canvas id="chartLevel" height="120"></canvas>
+  </div>`;
+}
+function drawCharts(){
+  chartInstances.forEach(c=>c.destroy());
+  chartInstances = [];
+  const p = STATE.progress;
+  const days = [];
+  const counts = [];
+  for(let i=13;i>=0;i--){
+    const d = new Date(Date.now()-i*86400000).toISOString().slice(0,10);
+    days.push(d.slice(5));
+    counts.push(p.dailyLog.filter(l=>l.date===d).length);
+  }
+  const c1 = document.getElementById('chartDaily');
+  if(c1) chartInstances.push(new Chart(c1, {type:'line', data:{labels:days, datasets:[{label:'Days completed', data:counts, borderColor:'#2E6F6B', backgroundColor:'rgba(46,111,107,0.15)', fill:true, tension:.3}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}}}}));
+
+  const c2 = document.getElementById('chartSkills');
+  if(c2) chartInstances.push(new Chart(c2, {type:'bar', data:{labels:['Vocab','Speaking','Listening','Reading','Writing','Grammar'], datasets:[{label:'Tasks completed', data:[p.vocabLearned,p.speakingDone,p.listeningDone,p.readingDone,p.writingDone,p.grammarDone], backgroundColor:['#C9A227','#B14A3B','#2E6F6B','#3C4E68','#4E938F','#1B2A41']}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}}));
+
+  const overall = computeOverallProgress(p);
+  const predicted = overall < 34 ? 'B1' : overall < 67 ? 'B1+' : 'B2';
+  const c3 = document.getElementById('chartLevel');
+  if(c3) chartInstances.push(new Chart(c3, {type:'bar', data:{labels:['B1','B1+','B2'], datasets:[{label:'Journey', data:[33,33,34], backgroundColor:['#4E938F','#C9A227','#B14A3B']}]}, options:{indexAxis:'y', plugins:{legend:{display:false}, title:{display:true, text:'Estimated current level: '+predicted}}, scales:{x:{stacked:true, display:false}, y:{stacked:true}}}}));
+}
+
+/* ============================================================
+   MASTER RENDER
+   ============================================================ */
+function render(){
+  let inner = '';
+  if(STATE.route==='dashboard') inner = renderDashboard();
+  else if(STATE.route==='roadmap') inner = renderRoadmap();
+  else if(STATE.route==='lesson') inner = renderLesson();
+  else if(STATE.route==='sentence') inner = renderSentenceBuilder();
+  else if(STATE.route==='erasmus') inner = renderErasmus();
+  else if(STATE.route==='movies') inner = renderMovies();
+  else if(STATE.route==='youtube') inner = renderYoutube();
+  else if(STATE.route==='tests') inner = renderTests();
+  else if(STATE.route==='coach') inner = renderCoach();
+  else if(STATE.route==='analytics') inner = renderAnalytics();
+
+  root.innerHTML = layout(inner);
+  document.documentElement.setAttribute('data-theme', STATE.theme);
+  attachEvents();
+  if(STATE.route==='analytics') setTimeout(drawCharts, 30);
+  if(STATE.route==='coach'){
+    const cw = document.getElementById('chatWindow');
+    if(cw) cw.scrollTop = cw.scrollHeight;
+  }
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function attachEvents(){
+  root.querySelectorAll('[data-route]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      STATE.route = el.getAttribute('data-route'); STATE.sidebarOpen=false; render();
+      if(STATE.route==='lesson') ensureLessonLoaded();
+      if(STATE.route==='tests') ensureTestLoaded(STATE.selWeek);
+    });
+  });
+  const hb = document.getElementById('hamburgerBtn');
+  if(hb) hb.addEventListener('click', ()=>{ STATE.sidebarOpen = !STATE.sidebarOpen; render(); });
+  const tt = document.getElementById('themeToggle');
+  if(tt) tt.addEventListener('click', async ()=>{ STATE.theme = STATE.theme==='dark'?'light':'dark'; await saveTheme(STATE.theme); render(); });
+
+  root.querySelectorAll('[data-week-jump]').forEach(el=>{
+    el.addEventListener('click', ()=>{ STATE.selWeek = parseInt(el.getAttribute('data-week-jump')); STATE.selDay=1; STATE.route='lesson'; render(); ensureLessonLoaded(); });
+  });
+  root.querySelectorAll('[data-sel-week]').forEach(el=>{
+    el.addEventListener('click', ()=>{ STATE.selWeek = parseInt(el.getAttribute('data-sel-week')); STATE.selDay=1; render(); ensureLessonLoaded(); });
+  });
+  root.querySelectorAll('[data-sel-day]').forEach(el=>{
+    el.addEventListener('click', ()=>{ STATE.selDay = parseInt(el.getAttribute('data-sel-day')); render(); ensureLessonLoaded(); });
+  });
+  root.querySelectorAll('[data-sel-week-test]').forEach(el=>{
+    el.addEventListener('click', ()=>{ STATE.selWeek = parseInt(el.getAttribute('data-sel-week-test')); render(); ensureTestLoaded(STATE.selWeek); });
+  });
+
+  root.querySelectorAll('[data-reveal]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const t = document.getElementById(el.getAttribute('data-reveal'));
+      if(t) t.classList.toggle('shown');
+      if(t) t.style.display = t.style.display==='block' ? 'none' : 'block';
+    });
+  });
+
+  root.querySelectorAll('.quiz-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const correct = parseInt(el.getAttribute('data-correct'));
+      const opt = parseInt(el.getAttribute('data-opt'));
+      const qi = el.getAttribute('data-quiz');
+      const fb = document.getElementById('qf-'+qi);
+      if(fb) fb.innerHTML = opt===correct ? '<span style="color:var(--teal);">✓ Correct!</span>' : '<span style="color:var(--red);">✗ Try again.</span>';
+    });
+  });
+
+  root.querySelectorAll('.test-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const correct = parseInt(el.getAttribute('data-correct'));
+      const oi = parseInt(el.getAttribute('data-oi'));
+      const key = el.getAttribute('data-tkey');
+      const ti = el.getAttribute('data-ti');
+      const fb = document.getElementById('tf-'+key+'-'+ti);
+      if(fb) fb.innerHTML = oi===correct ? '<span style="color:var(--teal);">✓ Correct</span>' : '<span style="color:var(--red);">✗ Incorrect</span>';
+    });
+  });
+
+  const completeBtn = document.getElementById('completeDayBtn');
+  if(completeBtn) completeBtn.addEventListener('click', ()=> markDayComplete(STATE.selWeek, STATE.selDay));
+
+  root.querySelectorAll('[data-task-done]').forEach(el=>{
+    el.addEventListener('click', ()=> markTaskDone(el.getAttribute('data-task-done')));
+  });
+
+  const genBtn = document.getElementById('genLessonBtn');
+  if(genBtn) genBtn.addEventListener('click', async ()=>{
+    STATE.lessonLoading = true; render();
+    try{
+      const wk = WEEKS[STATE.selWeek-1];
+      const data = await generateDailyLesson(STATE.selWeek, STATE.selDay, wk);
+      STATE.lessonCache[lessonKey()] = data;
+      await setCachedLesson(lessonKey(), data);
+    }catch(e){ console.error(e); alert('Could not generate the lesson. Please try again.'); }
+    STATE.lessonLoading = false; render();
+  });
+
+  const genTestBtn = document.getElementById('genTestBtn');
+  if(genTestBtn) genTestBtn.addEventListener('click', async ()=>{
+    STATE.testLoading = true; render();
+    try{
+      const wk = WEEKS[STATE.selWeek-1];
+      const data = await generateWeeklyTest(STATE.selWeek, wk);
+      STATE.testCache[STATE.selWeek] = data;
+      await setStateRow('test:'+STATE.selWeek, data);
+    }catch(e){ console.error(e); alert('Could not generate the test. Please try again.'); }
+    STATE.testLoading = false; render();
+  });
+
+  // sentence builder
+  root.querySelectorAll('.sb-chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      STATE.sbSlots[el.getAttribute('data-sb-key')] = el.getAttribute('data-sb-val');
+      render();
+    });
+  });
+  const sbReset = document.getElementById('sbReset');
+  if(sbReset) sbReset.addEventListener('click', ()=>{ STATE.sbSlots = {subject:null,verb:null,object:null,time:null,place:null}; render(); });
+
+  // coach chat
+  const chatSend = document.getElementById('chatSendBtn');
+  const chatInput = document.getElementById('chatInput');
+  async function sendChat(text){
+    if(!text || !text.trim()) return;
+    STATE.chat.push({role:'user', content:text});
+    STATE.chatLoading = true; render();
+    try{
+      const apiMessages = STATE.chat.map(m=>({role:m.role==='user'?'user':'assistant', content:m.content}));
+      const sys = "You are a warm, encouraging B1-to-B2 English coach for an Azerbaijani Erasmus/ESC applicant. Correct mistakes gently with brief explanations, teach natural phrasing, ask a follow-up speaking question when appropriate, and keep replies concise (under 100 words) and motivating. You may use short Azerbaijani asides in parentheses when clarifying a tricky point.";
+      const reply = await callClaude(apiMessages, sys, 500);
+      STATE.chat.push({role:'assistant', content:reply});
+      await saveChatHistory(STATE.chat);
+    }catch(e){ console.error(e); STATE.chat.push({role:'assistant', content:"Sorry, I couldn't respond right now — please try again."}); }
+    STATE.chatLoading = false; render();
+  }
+  if(chatSend) chatSend.addEventListener('click', ()=>{ const v = chatInput.value; chatInput.value=''; sendChat(v); });
+  if(chatInput) chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ const v = chatInput.value; chatInput.value=''; sendChat(v); }});
+  root.querySelectorAll('[data-quick]').forEach(el=>{
+    el.addEventListener('click', ()=> sendChat(el.getAttribute('data-quick')));
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function init(){
+  try{
+    await ensureAuth();
+  }catch(e){
+    root.innerHTML = `<div style="padding:40px; font-family:sans-serif; max-width:520px; margin:60px auto; text-align:center;">
+      <h2>Connection issue</h2>
+      <p>Couldn't connect to the Compass database. This usually means <b>Anonymous Sign-In</b> isn't enabled yet in the Supabase project (Authentication → Settings → Enable anonymous sign-ins), or the network blocked the request.</p>
+    </div>`;
+    return;
+  }
+  STATE.progress = await loadProgress();
+  STATE.theme = await loadTheme();
+  STATE.chat = await getChatHistory();
+  render();
+  ensureLessonLoaded();
+}
+init();
+</script>
+</body>
+</html>
